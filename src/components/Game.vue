@@ -47,6 +47,16 @@
         }
         return false;
       },
+      checkFullBoard() {
+        for (let i=0; i<3; i++) {
+          for (let j=0; j<3; j++) {
+            if (!this.board[i][j]) {
+              return false;
+            }
+          }
+        }
+        return true;
+      },
       place: function(i, j) {
         if (!this.board[i][j]) {
           //update array using Vue.set to force rerender
@@ -61,11 +71,12 @@
           let vic = this.checkVictory();
           if (vic) {
             this.bus.$emit('victory', vic[0], vic[1]);
+          } else if (this.checkFullBoard()) {
+            this.bus.$emit('victory', '', []);
           }
         }
       },
       startNewGame: function() {
-        console.log("called");
         this.x = true;
         this.$set(this.board, 0, ['', '', '']);
         this.$set(this.board, 1, ['', '', '']);

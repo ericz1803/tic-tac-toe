@@ -9,25 +9,27 @@
           </tr>
       </table>
       <div id="drawing"></div>
-      <transition name="fade">
-        <div v-if="isShowing">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-mask">
-              <div class="modal-wrapper">
-                <div class="modal-content">
-                  <h1 class="modal-title">{{ winner }} Wins!</h1>
-                  <div class="buttonWrapper">
-                    <button class="button btn btn-light" type="button" v-on:click="newGame()">
-                      <i class="fas fa-redo fa-4x"></i>
-                    </button>
+      <div class="transitionWrapper">
+        <transition name="fade">
+          <div v-if="isShowing">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-mask">
+                <div class="modal-wrapper">
+                  <div class="modal-content">
+                    <h1 class="modal-title">{{ winner ? winner + ' Wins!' : 'Tie Game!'}}</h1>
+                    <div class="buttonWrapper">
+                      <button class="button btn btn-light" type="button" v-on:click="newGame()">
+                        <i class="fas fa-redo fa-4x"></i>
+                      </button>
+                    </div>
+                    
                   </div>
-                  
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </transition>
+        </transition>
+      </div>
     </div>
     
 </template>
@@ -56,9 +58,14 @@
       }, 
       victory: function(letter, points) {
         this.winner = letter;
-        console.log(letter + " Wins!");
-        this.drawLine(points[0], points[1]);
-        setTimeout(this.showModal, 1750);
+        if (this.winner) {
+          console.log(letter + " Wins!");
+          this.drawLine(points[0], points[1]);
+          setTimeout(this.showModal, 1750);
+        } else {
+          setTimeout(this.showModal, 250);
+        }
+        
       },
       drawLine: function(a, b) {
         let domRect = this.$refs.grid.getBoundingClientRect();
@@ -118,6 +125,11 @@ table td {
   color: rgba(0, 0, 0, 0.5);
 }
 
+.transitionWrapper {
+  position: relative;
+  z-index: 9998;
+}
+
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -157,6 +169,10 @@ table td {
 
 .fade-enter, .fade-leave-to {
   opacity: 0;
+}
+
+.fade-enter-to, .fade-leave {
+  opacity: 1;
 }
 
 </style>
