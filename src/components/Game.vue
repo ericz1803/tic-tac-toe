@@ -1,6 +1,6 @@
 <template>
   <div id="game">
-    <Board :board.sync="board" :x="x" :bus="bus" @place="place"/>
+    <Board :board.sync="board" :x="x" :bus="bus" @place="place" @startNewGame="startNewGame"/>
   </div>
 </template>
 
@@ -63,6 +63,13 @@
             this.bus.$emit('victory', vic[0], vic[1]);
           }
         }
+      },
+      startNewGame: function() {
+        console.log("called");
+        this.x = true;
+        this.$set(this.board, 0, ['', '', '']);
+        this.$set(this.board, 1, ['', '', '']);
+        this.$set(this.board, 2, ['', '', '']);
       },
     },
   }
