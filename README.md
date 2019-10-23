@@ -1,4 +1,6 @@
-# test-app
+# Tic Tac Toe
+
+A simple Tic Tac Toe web app made with Vue.js.
 
 ## Project setup
 ```
@@ -15,10 +17,7 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
+### Deploy
 ```
-npm run lint
+./deploy.sh
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
