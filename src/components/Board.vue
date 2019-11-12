@@ -114,6 +114,10 @@ table td {
   font-size: 48px;
 }
 
+table td:hover {
+  cursor: default;
+}
+
 #drawing {
   position: absolute;
   left: 0;
