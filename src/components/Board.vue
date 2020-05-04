@@ -1,10 +1,10 @@
 <template>
     <div id="board">
-      <h2>{{ turnLetter }}'s Turn</h2>
+      <h2>{{ displayLetter }} Turn</h2>
       <table class="table table-bordered" ref="grid">
           <tr v-for="(row, i) in board" :key="`board-${i}`">
             <td v-for="(x, j) in row" :key="`cell-${j}`" v-on:click="placeToken(i, j); $set(hover, i*3+j, false)" v-on:mouseover="x ? $set(hover, i*3+j, false) : $set(hover, i*3+j, true)" v-on:mouseleave="$set(hover, i*3+j, false)">
-              {{ x }} <span class="hover-text" v-show="hover[i*3 + j]">{{ turnLetter }}</span>
+              {{ x }} <span class="hover-text" v-show="hover[i*3 + j]">{{ hoverLetter }}</span>
             </td>
           </tr>
       </table>
@@ -35,7 +35,8 @@
 </template>
 
 <script>
-  import SVG from 'svg.js';
+  import { SVG } from '@svgdotjs/svg.js';
+  import { mapState } from 'vuex';
 
   export default {
     name: 'board',
@@ -46,15 +47,29 @@
         winner: '',
       }
     }, 
-    props: ['board', 'x', 'bus'],
+    props: ['x', 'bus'],
     computed: {
-      turnLetter: function() {
-        return (this.x ? 'X' : 'O');
+      ...mapState({
+        board: state => state.board,
+        computer: state => state.computer,
+      }),
+      hoverLetter (state) {
+          return (this.x ? 'X' : 'O');
+      },
+      displayLetter (state) {
+        if (state.computer) {
+          return (this.x ? 'Your' : "Computer's");
+        }
+        else {
+          return (this.x ? "X's" : "O's");
+        }
       },
     },
     methods: {
       placeToken: function(i, j) {
-        this.$emit('place', i, j);
+        if (!this.computer || this.x) {
+          this.$emit('place', i, j);
+        }
       }, 
       victory: function(letter, points) {
         this.winner = letter;
@@ -69,14 +84,12 @@
       },
       drawLine: function(a, b) {
         let domRect = this.$refs.grid.getBoundingClientRect();
-        let draw = SVG('drawing').size(window.innerWidth, window.innerHeight);
-        let str = 'M' + (domRect.left + 150 * a[1] + 75) + ' ' + (domRect.top + 150 * a[0] + 75) + ' L' + (domRect.left + 150 * b[1] + 75) + ' '  + (domRect.top + 150 * b[0] + 75);
+        let draw = SVG().addTo('#drawing').size(window.innerWidth, window.innerHeight);
+        let str = 'M' + (domRect.left + 150 * a[1] + 75) + ' ' + (domRect.top + 150 * a[0] + 75) + ' L' + (domRect.left + 150 * b[1] + 75) + ' '  + (domRect.top + 150 * b[0] + 75); //svg path for line
         let path = draw.path(str);
         let len = path.length();
-        //draw.path('M' + (domRect.left + 150 * a[0] + 75) + ' ' + (domRect.top + 150 * a[1] + 75) + ' L' + (domRect.left + 150 * b[0] + 75) + ' ' + (domRect.top + 150 * b[1] + 75));
-        //let line = draw.line(domRect.left + 150 * a[1] + 75, domRect.top + 150 * a[0] + 75, domRect.left + 150 * b[1] + 75, domRect.top + 150 * b[0] + 75);
-        path.attr('stroke-dashoffset', len).animate(1000, '<>', 100).attr('stroke-dashoffset', 0);
-        path.stroke({linecap: 'round', width: 7, dasharray: len});
+        path.attr('stroke-dashoffset', len).animate(1000, 100, 'now').ease('<>').attr('stroke-dashoffset', 0); //drawing animation
+        path.stroke({linecap: 'round', width: 7, dasharray: len, color: '#000'});
       },
       showModal: function() {
         this.isShowing = true;
@@ -86,7 +99,7 @@
         this.isShowing = false;
         this.hover = [false, false, false, false, false, false, false, false, false];
         this.winner = '';
-        $('#drawing').empty();
+        document.getElementById('drawing').innerHTML = '';
       },
     },
     mounted() {
@@ -122,7 +135,7 @@ table td:hover {
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 1;
+  z-index: 999;
 }
 
 .hover-text {
