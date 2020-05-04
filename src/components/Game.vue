@@ -211,7 +211,7 @@ export default {
 }
 
 .buttonWrapper {
-  margin: 25px 5px auto;
+  margin: 25px 1em;
 }
 
 .button {
