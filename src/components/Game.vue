@@ -37,8 +37,8 @@
         </div>
       </transition>
     </div>
-    <Board :x="x" :bus="bus" @place="place" @startNewGame="startNewGame" />
-    <Minimax :x="x" @place="place" />
+    <Board :x="x" :bus="bus" />
+    <Minimax :x="x" />
   </div>
 </template>
 
@@ -67,68 +67,56 @@ export default {
     };
   },
   methods: {
-    checkVictory: function() {
-      //return: [winning letter, [[i, j][x, y]] (squares to draw line through)]
-
+    //return: [winning letter, [[x1, y1][x2, y2]] (squares to draw line through)] if there is a winner,
+    //otherwise return false
+    checkVictory: function(board) {
       //check rows and cols
       for (let i = 0; i < 3; i++) {
-        //check equal and not null
         if (
-          this.board[i][0] &&
-          this.board[i][0] == this.board[i][1] &&
-          this.board[i][1] == this.board[i][2]
+          board[i][0] &&
+          board[i][0] == board[i][1] &&
+          board[i][1] == board[i][2]
         ) {
           return [
-            this.board[i][0],
-            [
-              [i, 0],
-              [i, 2]
-            ]
+            board[i][0],
+            [[i, 0], [i, 2]]
           ];
-        }
-        if (
-          this.board[0][i] &&
-          this.board[0][i] == this.board[1][i] &&
-          this.board[1][i] == this.board[2][i]
+        } else if (
+          board[0][i] &&
+          board[0][i] == board[1][i] &&
+          board[1][i] == board[2][i]
         ) {
           return [
-            this.board[0][i],
-            [
-              [0, i],
-              [2, i]
-            ]
+            board[0][i],
+            [[0, i], [2, i]]
           ];
         }
       }
+
       //check diagonals
       if (
-        this.board[0][0] &&
-        this.board[0][0] == this.board[1][1] &&
-        this.board[1][1] == this.board[2][2]
+        board[0][0] &&
+        board[0][0] == board[1][1] &&
+        board[1][1] == board[2][2]
       ) {
         return [
-          this.board[0][0],
-          [
-            [0, 0],
-            [2, 2]
-          ]
+          board[0][0],
+          [[0, 0], [2, 2]]
         ];
-      }
-      if (
-        this.board[2][0] &&
-        this.board[2][0] == this.board[1][1] &&
-        this.board[1][1] == this.board[0][2]
+      } else if (
+        board[2][0] &&
+        board[2][0] == board[1][1] &&
+        board[1][1] == board[0][2]
       ) {
         return [
-          this.board[0][2],
-          [
-            [0, 2],
-            [2, 0]
-          ]
+          board[0][2],
+          [[0, 2], [2, 0]]
         ];
       }
       return false;
     },
+
+    //check if all squares are filled
     checkFullBoard() {
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
@@ -141,19 +129,18 @@ export default {
     },
     place: function(i, j) {
       if (!this.board[i][j]) {
-        //update array using Vue.set to force rerender
         let val = this.x ? "X" : "O";
-        this.$store.commit('set', {i: i, j: j, val: val})
+        this.$store.commit('set', {i: i, j: j, val: val}) //update array this way to force rerender
 
         //other player's turn
         this.x = !this.x;
 
-        //checkVictory
-        let vic = this.checkVictory();
+        //check if one player has won or it is a tie
+        let vic = this.checkVictory(this.board);
         if (vic) {
-          this.bus.$emit("victory", vic[0], vic[1]);
+          this.bus.$emit("endGame", vic[0], vic[1]);
         } else if (this.checkFullBoard()) {
-          this.bus.$emit("victory", "", []);
+          this.bus.$emit("endGame", "", []);
         }
       }
     },

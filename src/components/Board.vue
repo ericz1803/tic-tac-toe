@@ -1,12 +1,14 @@
 <template>
     <div id="board">
-      <h2>{{ displayLetter }} Turn</h2>
+      <h2>{{ displayTurn }} Turn</h2>
       <table class="table table-bordered" ref="grid">
-          <tr v-for="(row, i) in board" :key="`board-${i}`">
-            <td v-for="(x, j) in row" :key="`cell-${j}`" v-on:click="placeToken(i, j); $set(hover, i*3+j, false)" v-on:mouseover="x ? $set(hover, i*3+j, false) : $set(hover, i*3+j, true)" v-on:mouseleave="$set(hover, i*3+j, false)">
-              {{ x }} <span class="hover-text" v-show="hover[i*3 + j]">{{ hoverLetter }}</span>
-            </td>
-          </tr>
+        <tr v-for="(row, i) in board" :key="`board-${i}`">
+          <td v-for="(x, j) in row" :key="`cell-${j}`" v-on:click="placeToken(i, j); $set(hover, i*3+j, false)" 
+            v-on:mouseover="x ? $set(hover, i*3+j, false) : $set(hover, i*3+j, true)" v-on:mouseleave="$set(hover, i*3+j, false)"
+          >
+            {{ x }} <span class="hover-text" v-show="hover[i*3 + j]">{{ hoverLetter }}</span>
+          </td>
+        </tr>
       </table>
       <div id="drawing"></div>
       <div class="transitionWrapper">
@@ -53,10 +55,10 @@
         board: state => state.board,
         computer: state => state.computer,
       }),
-      hoverLetter (state) {
+      hoverLetter () {
           return (this.x ? 'X' : 'O');
       },
-      displayLetter (state) {
+      displayTurn (state) {
         if (state.computer) {
           return (this.x ? 'Your' : "Computer's");
         }
@@ -68,10 +70,10 @@
     methods: {
       placeToken: function(i, j) {
         if (!this.computer || this.x) {
-          this.$emit('place', i, j);
+          this.$parent.place(i, j);
         }
       }, 
-      victory: function(letter, points) {
+      endGame: function(letter, points) {
         this.winner = letter;
         if (this.winner) {
           console.log(letter + " Wins!");
@@ -80,7 +82,6 @@
         } else {
           setTimeout(this.showModal, 250);
         }
-        
       },
       drawLine: function(a, b) {
         let domRect = this.$refs.grid.getBoundingClientRect();
@@ -95,7 +96,7 @@
         this.isShowing = true;
       },
       newGame: function() {
-        this.$emit('startNewGame');
+        this.$parent.startNewGame();
         this.isShowing = false;
         this.hover = [false, false, false, false, false, false, false, false, false];
         this.winner = '';
@@ -103,7 +104,7 @@
       },
     },
     mounted() {
-      this.bus.$on('victory', this.victory)
+      this.bus.$on('endGame', this.endGame)
     },
   }
 </script>
